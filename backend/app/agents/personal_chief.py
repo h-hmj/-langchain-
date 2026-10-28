@@ -5,6 +5,7 @@ from langchain_tavily import TavilySearch
 from langchain.agents import create_agent
 from common.logger import logger
 import os
+from pathlib import Path
 from langgraph.checkpoint.sqlite import SqliteSaver
 import sqlite3
 
@@ -29,8 +30,10 @@ model = init_chat_model(
 )
 
 
-# 初始化checkpointer
-checkpointer = SqliteSaver(sqlite3.connect("db/personal_chief.db", check_same_thread=False))
+# 初始化checkpointer（db 路径固定到 backend 根目录，不依赖启动时的工作目录）
+_db_dir = Path(__file__).resolve().parents[2] / "db"
+_db_dir.mkdir(parents=True, exist_ok=True)
+checkpointer = SqliteSaver(sqlite3.connect(str(_db_dir / "personal_chief.db"), check_same_thread=False))
 # 自动建表
 checkpointer.setup()
 
